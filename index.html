@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPA Signer - Family Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-900 via-blue-900 to-black text-white min-h-screen">
+    <div class="container mx-auto px-4 py-12 max-w-4xl">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">
+                IPA Signer
+            </h1>
+            <p class="text-gray-300 text-lg">
+                Sign your IPAs instantly
+            </p>
+        </div>
+
+        <!-- Security Warning -->
+        <div class="bg-yellow-500/10 border border-yellow-500/50 rounded-lg p-4 mb-8">
+            <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <div>
+                    <h3 class="font-semibold text-yellow-500 mb-1">Security Notice</h3>
+                    <p class="text-sm text-gray-300">
+                        Use a burner Apple ID or app-specific passwords only. Your credentials are used only for signing and are never stored permanently.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- App-Specific Password Guide Button -->
+        <button id="guideToggle" class="w-full mb-6 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/50 rounded-lg p-4 transition-all">
+            <div class="flex items-center justify-between">
+                <span class="font-semibold">How to generate an App-Specific Password</span>
+                <span class="text-2xl" id="guideIcon">+</span>
+            </div>
+        </button>
+
+        <!-- Guide Content (Hidden by default) -->
+        <div id="guideContent" class="bg-gray-800/50 rounded-lg p-6 mb-8 space-y-3 hidden">
+            <ol class="list-decimal list-inside space-y-2 text-gray-300">
+                <li>Go to <a href="https://appleid.apple.com" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">appleid.apple.com</a></li>
+                <li>Sign in with your Apple ID</li>
+                <li>Navigate to "Security" section</li>
+                <li>Under "App-Specific Passwords", click "Generate Password"</li>
+                <li>Enter a label (e.g., "IPA Signer")</li>
+                <li>Copy the generated password and use it below</li>
+            </ol>
+        </div>
+
+        <!-- Main Form -->
+        <div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-gray-700">
+            <div class="space-y-6">
+                <!-- File Upload -->
+                <div>
+                    <label class="block text-sm font-semibold mb-2">IPA File</label>
+                    <input type="file" accept=".ipa" id="ipaFile" class="hidden">
+                    <label for="ipaFile" id="fileLabel" class="flex items-center justify-center gap-3 bg-gray-700/50 hover:bg-gray-700 border-2 border-dashed border-gray-600 rounded-lg p-8 cursor-pointer transition-all">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                        </svg>
+                        <span id="fileName">Click to upload IPA file</span>
+                    </label>
+                    <p class="text-xs text-gray-400 mt-2" id="fileSize"></p>
+                </div>
+
+                <!-- Apple ID -->
+                <div>
+                    <label class="block text-sm font-semibold mb-2">Apple ID</label>
+                    <input
+                        type="email"
+                        id="appleId"
+                        placeholder="your@email.com"
+                        class="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors"
+                    >
+                </div>
+
+                <!-- App-Specific Password -->
+                <div>
+                    <label class="block text-sm font-semibold mb-2">App-Specific Password</label>
+                    <div class="relative">
+                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                        <input
+                            type="password"
+                            id="appPassword"
+                            placeholder="xxxx-xxxx-xxxx-xxxx"
+                            class="w-full bg-gray-700/50 border border-gray-600 rounded-lg pl-11 pr-4 py-3 focus:outline-none focus:border-blue-500 transition-colors"
+                        >
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button
+                    id="submitBtn"
+                    class="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-lg py-4 font-semibold text-lg transition-all shadow-lg"
+                >
+                    Sign IPA
+                </button>
+            </div>
+
+            <!-- Progress Bar -->
+            <div id="progressContainer" class="mt-6 hidden">
+                <div class="bg-gray-700 rounded-full h-2 overflow-hidden">
+                    <div id="progressBar" class="bg-gradient-to-r from-purple-500 to-blue-500 h-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <p class="text-sm text-gray-400 mt-2 text-center" id="progressText">Uploading...</p>
+            </div>
+
+            <!-- Status Messages -->
+            <div id="statusContainer" class="mt-6 hidden"></div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-gray-400 text-sm">
+            <p>For family use only • Running on VPS</p>
+        </div>
+    </div>
+
+    <script>
+        // Configuration - UPDATE THIS WITH YOUR VPS URL
+        const API_URL = 'http://YOUR_VPS_IP:3000/api'; // Change this to your VPS address
+        
+        // Guide toggle
+        const guideToggle = document.getElementById('guideToggle');
+        const guideContent = document.getElementById('guideContent');
+        const guideIcon = document.getElementById('guideIcon');
+
+        guideToggle.addEventListener('click', () => {
+            guideContent.classList.toggle('hidden');
+            guideIcon.textContent = guideContent.classList.contains('hidden') ? '+' : '−';
+        });
+
+        // File upload
+        const ipaFile = document.getElementById('ipaFile');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const fileLabel = document.getElementById('fileLabel');
+        let selectedFile = null;
+
+        ipaFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && file.name.endsWith('.ipa')) {
+                selectedFile = file;
+                fileName.textContent = file.name;
+                const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                fileSize.textContent = `File size: ${sizeMB} MB`;
+            } else {
+                alert('Please select a valid .ipa file');
+                ipaFile.value = '';
+                selectedFile = null;
+                fileSize.textContent = '';
+            }
+        });
+
+        // Form submission
+        const submitBtn = document.getElementById('submitBtn');
+        const appleIdInput = document.getElementById('appleId');
+        const appPasswordInput = document.getElementById('appPassword');
+        const statusContainer = document.getElementById('statusContainer');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+
+        submitBtn.addEventListener('click', async () => {
+            const appleId = appleIdInput.value.trim();
+            const appPassword = appPasswordInput.value.trim();
+
+            if (!selectedFile || !appleId || !appPassword) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            // Disable form
+            disableForm();
+
+            try {
+                // Create FormData
+                const formData = new FormData();
+                formData.append('ipa', selectedFile);
+                formData.append('appleId', appleId);
+                formData.append('appPassword', appPassword);
+
+                // Show progress
+                progressContainer.classList.remove('hidden');
+                progressBar.style.width = '0%';
+                progressText.textContent = 'Uploading IPA...';
+
+                // Upload and sign
+                const xhr = new XMLHttpRequest();
+                
+                // Track upload progress
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const percentComplete = (e.loaded / e.total) * 50; // First 50% is upload
+                        progressBar.style.width = percentComplete + '%';
+                        progressText.textContent = `Uploading... ${Math.round(percentComplete)}%`;
+                    }
+                });
+
+                xhr.addEventListener('load', function() {
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        
+                        if (response.success) {
+                            // Signing complete
+                            progressBar.style.width = '100%';
+                            progressText.textContent = 'Signed successfully!';
+                            
+                            setTimeout(() => {
+                                showStatus('success', response.downloadUrl);
+                                progressContainer.classList.add('hidden');
+                            }, 500);
+                        } else {
+                            showStatus('error', null, response.error || 'Unknown error occurred');
+                            progressContainer.classList.add('hidden');
+                        }
+                    } else {
+                        showStatus('error', null, 'Server error: ' + xhr.status);
+                        progressContainer.classList.add('hidden');
+                    }
+                });
+
+                xhr.addEventListener('error', function() {
+                    showStatus('error', null, 'Network error occurred');
+                    progressContainer.classList.add('hidden');
+                });
+
+                // Simulate signing progress while waiting for response
+                xhr.addEventListener('loadstart', function() {
+                    let progress = 50;
+                    const interval = setInterval(() => {
+                        if (progress < 95 && xhr.readyState !== 4) {
+                            progress += 5;
+                            progressBar.style.width = progress + '%';
+                            progressText.textContent = 'Signing IPA...';
+                        } else {
+                            clearInterval(interval);
+                        }
+                    }, 500);
+                });
+
+                xhr.open('POST', `${API_URL}/sign`, true);
+                xhr.send(formData);
+
+            } catch (error) {
+                console.error('Error:', error);
+                showStatus('error', null, error.message);
+                progressContainer.classList.add('hidden');
+                enableForm();
+            }
+        });
+
+        function disableForm() {
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            submitBtn.textContent = 'Processing...';
+            ipaFile.disabled = true;
+            appleIdInput.disabled = true;
+            appPasswordInput.disabled = true;
+            fileLabel.classList.add('pointer-events-none', 'opacity-50');
+        }
+
+        function enableForm() {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            submitBtn.textContent = 'Sign IPA';
+            ipaFile.disabled = false;
+            appleIdInput.disabled = false;
+            appPasswordInput.disabled = false;
+            fileLabel.classList.remove('pointer-events-none', 'opacity-50');
+        }
+
+        function showStatus(status, downloadUrl = '', errorMsg = '') {
+            statusContainer.classList.remove('hidden');
+            
+            if (status === 'success') {
+                statusContainer.innerHTML = `
+                    <div class="bg-green-500/10 border border-green-500/50 rounded-lg p-4">
+                        <div class="flex items-center gap-3 mb-4">
+                            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span class="font-semibold">Your IPA has been signed!</span>
+                        </div>
+                        <a href="${downloadUrl}" download class="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 rounded-lg py-3 font-semibold transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            Download Signed IPA
+                        </a>
+                    </div>
+                `;
+                
+                // Reset form after a delay
+                setTimeout(() => {
+                    enableForm();
+                    selectedFile = null;
+                    fileName.textContent = 'Click to upload IPA file';
+                    fileSize.textContent = '';
+                    ipaFile.value = '';
+                }, 1000);
+                
+            } else if (status === 'error') {
+                enableForm();
+                statusContainer.innerHTML = `
+                    <div class="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
+                        <div class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                            <div>
+                                <span class="font-semibold block mb-1">Failed to sign IPA</span>
+                                <span class="text-sm text-gray-300">${errorMsg || 'Please check your credentials and try again.'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
